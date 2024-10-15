@@ -13,15 +13,15 @@ import ProfileBioMadal from "./Dailog/ProfileBioModal.jsx";
 import ProfileModal from "./Dailog/ProfileModal.jsx";
 import { NavLink } from "react-router-dom";
 import { useSocket } from "../../utlis/socket.jsx";
+import Modal from "./Dailog/MessageModal/GroupDailog.jsx";
 
 function ChatListBox() {
   const dispatch = useDispatch();
   const { chats, loading, error } = useSelector((state) => state.chat);
-
+ 
   const socket = useSocket();
 
-  console.log(socket.id);
-
+  
   useEffect(() => {
     dispatch(fetchChats());
   }, [dispatch]);
@@ -82,6 +82,15 @@ function ChatListBox() {
             >
               Network
             </button>
+            {/* <NavLink
+      to={`/group/${chats?._id}`}
+      className="btn fw-semibold btn-sm w-25 me-1 msgtoggle"
+      activeClassName="active" // Optionally for active styling
+    >
+      Groups
+    </NavLink> */}
+      
+
             <button
               className="btn fw-semibold  btn-sm w-25 me-1 msgtoggle"
               data-bs-toggle="modal"

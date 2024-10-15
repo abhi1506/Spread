@@ -28,8 +28,8 @@ const ConversationList = ({ chats }) => {
           name={item.name}
           title={item.groupChat ? "Group Chat" : "Single Chat"} 
           imageUrl={item.avatar}
-          latestText={item.latestText || "No recent messages"} // Assuming latestText is part of your data
-          createAt={item.createAt || "Just now"} // Assuming createAt is part of your data
+          latestText={item.latestText || "No recent messages"} 
+          createAt={item.createAt || "Just now"} 
           onConversationItemSelected={() => handleConversationItemSelected(index)}
           isActive={index === selectedConversationIndex}
           count={count} 

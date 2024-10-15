@@ -16,7 +16,7 @@ import adminRouter from './routes/admin.js';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import cloudinary from "cloudinary";
-import { NEW_MESSAGE, NEW_MESSAGE_ALERT } from './constants/event.js';
+import { NEW_MESSAGE, NEW_MESSAGE_ALERT, START_TYPING, STOP_TYPING } from './constants/event.js';
 import { v4 as uuidv4 } from 'uuid';
 import { getSockets } from './lib/helper.js';
 import Message from './models/messageModel.js';
@@ -139,6 +139,17 @@ io.on('connection', (socket) => {
     } catch (error) {
       console.error('Error handling new message event:', error);
     }
+  });
+  
+  socket.on(START_TYPING,({members,chatId})=>{
+    console.log("typing",members,chatId)
+    const membersSockets = getSockets(members)
+    socket.to(membersSockets).emit(START_TYPING,{chatId})
+  })
+
+  socket.on(STOP_TYPING, ({ members, chatId }) => {
+    const membersSockets = getSockets(members);
+    socket.to(membersSockets).emit(STOP_TYPING, { chatId });
   });
   
 

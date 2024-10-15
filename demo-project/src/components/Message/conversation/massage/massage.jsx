@@ -13,7 +13,7 @@ import { FaMicrophone } from "react-icons/fa";
 import { IoCameraOutline } from "react-icons/io5";
 import { BsEmojiSmile } from "react-icons/bs";
 import { TbSend } from "react-icons/tb";
-import { NEW_MESSAGE } from '../../../../constant/event';
+import { NEW_MESSAGE, START_TYPING, STOP_TYPING } from '../../../../constant/event';
 import Picker from '@emoji-mart/react';
 import { MdOutlineAttachment } from "react-icons/md";
 import { FileMenu } from '../../Dailog/FileMenu';
@@ -23,6 +23,12 @@ const MessageBox = () => {
   const { id: chatId } = useParams();
   const [messagesArr, setMessageArr] = useState([]);
   const [message, setMessages] = useState('');
+
+  const [IamTyping, setIamTyping] = useState(false);
+  const [userTyping, setUSerTyping] = useState(false);
+  const typingTimeout = useRef(null);
+  console.log(userTyping)
+
   const [page, setPage] = useState(1);
   const [emoji, setEmoji] = useState(false);
   const [isFile, setIsFile] = useState(false);
@@ -50,8 +56,11 @@ const MessageBox = () => {
   }, [messagesArr]);
 
   useEffect(() => {
-    setMessageArr([]);
-    setMessages('');
+    return () => {
+      setMessageArr([]);
+      setMessages('');
+      setPage(1);
+    };
     dispatch(removeAlertMessage(chatId));
   }, [chatId, dispatch]);
 
@@ -66,6 +75,20 @@ const MessageBox = () => {
     setMessages(prevInput => prevInput + emoji.native);
   }, []);
 
+  const messageOnChange=(e)=>{
+    setMessages(e.target.value)
+    if(!IamTyping){
+      socket.emit(START_TYPING,{members,chatId});
+      setIamTyping(true)
+    }
+    if(typingTimeout.current) clearTimeout(typingTimeout.current)
+
+    typingTimeout.current=setTimeout(()=>{
+      socket.emit(STOP_TYPING,{members,chatId})
+      setIamTyping(false)
+    },[2000])
+  }
+
   const handleNewMessage = useCallback((data) => {
     if (data.chatId !== chatId) return;
     setMessageArr(prev => [...prev, data.message]);
@@ -78,19 +101,37 @@ const MessageBox = () => {
     }
   }, [dispatch, chatId]);
 
+  const startTypingListener = useCallback((data) => {
+    if (data.chatId !== chatId) return;
+    console.log("Start Typing",data)
+    setUSerTyping(true)
+  }, [chatId]);
+
+  const stopTypingListener = useCallback((data) => {
+    if (data.chatId !== chatId) return;
+    console.log("Stop Typing",data)
+    setUSerTyping(false)
+  }, [chatId]);
+
   useEffect(() => {
     socket.on(NEW_MESSAGE, handleNewMessage);
-    socket.on('NEW_MESSAGE_ALERT', newMessageAlretHandler);
+    socket.on("NEW_MESSAGE_ALERT", newMessageAlretHandler);
+    socket.on(START_TYPING, startTypingListener);
+    socket.on(STOP_TYPING, stopTypingListener);
+  
     return () => {
       socket.off(NEW_MESSAGE, handleNewMessage);
-      socket.off('NEW_MESSAGE_ALERT', newMessageAlretHandler);
+      socket.off("NEW_MESSAGE_ALERT", newMessageAlretHandler);
+      socket.off(START_TYPING, startTypingListener);
+      socket.off(STOP_TYPING, stopTypingListener);
     };
-  }, [socket, handleNewMessage, newMessageAlretHandler]);
+  }, [socket, handleNewMessage, newMessageAlretHandler, startTypingListener]);
+  
 
   const sortedMessages = allMessage.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const messageItems = sortedMessages.map((message) => (
-    <MessageItem message={message} user={user} key={message._id} />
+    <MessageItem message={message} user={user} key={message._id} userTyping={userTyping} />
   ));
 
   const handleFileOpen = () => {
@@ -145,7 +186,7 @@ const MessageBox = () => {
               type='text'
               className='me-2'
               value={message}
-              onChange={(e) => setMessages(e.target.value)}
+              onChange={messageOnChange}
               placeholder='Type a message'
               aria-label='Message input'
             />
