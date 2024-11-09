@@ -1,1 +1,22 @@
+{
+  "version": 2,
+  "projects": [
+    {
+      "name": "demo-project",
+      "path": "demo-project",
+      "builds": [{ "src": "demo-project/package.json", "use": "@vercel/next" }],
+      "routes": [
+        { "src": "/(.*)", "dest": "demo-project/$1" }
+      ]
+    },
+    {
+      "name": "server",
+      "path": "server",
+      "builds": [{ "src": "server/index.js", "use": "@vercel/node" }],
+      "routes": [
+        { "src": "/api/(.*)", "dest": "server/api/$1" }
+      ]
+    }
+  ]
+}
 
