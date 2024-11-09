@@ -2,19 +2,19 @@
   "version": 2,
   "projects": [
     {
-      "name": "frontend",
-      "path": "frontend",
-      "builds": [{ "src": "frontend/package.json", "use": "@vercel/next" }],
+      "name": "demo-project",
+      "path": "demo-project",
+      "builds": [{ "src": "demo-project/package.json", "use": "@vercel/next" }],
       "routes": [
-        { "src": "/(.*)", "dest": "frontend/$1" }
+        { "src": "/(.*)", "dest": "demo-project/$1" }
       ]
     },
     {
-      "name": "backend",
-      "path": "backend",
-      "builds": [{ "src": "backend/index.js", "use": "@vercel/node" }],
+      "name": "server",
+      "path": "server",
+      "builds": [{ "src": "server/index.js", "use": "@vercel/node" }],
       "routes": [
-        { "src": "/api/(.*)", "dest": "backend/api/$1" }
+        { "src": "/api/(.*)", "dest": "server/api/$1" }
       ]
     }
   ]
